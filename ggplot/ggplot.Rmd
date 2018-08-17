@@ -61,7 +61,7 @@ ggplot(data = com_fem,
 - 어떤 데이터를 쓸 것인지, x축과 y축은 무엇으로 할 것인지를 지정해주었다.
 - 어떤 형태의 그래프로 그릴 것인지 지정해주지 않았기 때문에 아직 그래프가 그려지진 않았다.
 
-##2. 그래프에 데이터 표시
+## 2. 그래프에 데이터 표시
 ```{r}
 ggplot(data = com_fem,
        aes(x = name, y = median_age)) +
@@ -72,7 +72,7 @@ ggplot(data = com_fem,
 - geom_point로 데이터를 표시하고, 색을 지정해주었다.
 - 아직 데이터가 정렬되지 않았기 때문에 점이 난잡하게 찍혀 있는 것을 확인할 수 있다.
 
-##3. 데이터 정렬
+## 3. 데이터 정렬
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, median_age), y = median_age)) +
@@ -84,7 +84,7 @@ ggplot(data = com_fem,
 - 하지만 오름차순으로 정렬되어 아직 약간 아쉽다.
 - 내림차순으로 정렬하면 보기 더 편할 것 같다.
 
-##4. 내림차순 정렬
+## 4. 내림차순 정렬
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, -median_age), y = median_age)) +
@@ -94,7 +94,7 @@ ggplot(data = com_fem,
 ![graph4](https://github.com/rakkoon23/My_Dictionary_of_R/blob/master/ggplot/4.png?raw=true)
 - reorder() 내의 median_age에 마이너스 부호를 붙여서 내림차순으로 정렬했다.
 
-##5. 주변요소 설정
+## 5. 주변요소 설정
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, -median_age), y = median_age)) +
@@ -112,7 +112,7 @@ ggplot(data = com_fem,
 - xlab은 굳이 설명하지 않아도 알 수 있어서 NULL 값을 주었다.
 - 점을 강조하기 위해 geom_point의 설정을 조금 바꾸었다.
 
-##6. 그래프에 새로운 정보를 추가하기
+## 6. 그래프에 새로운 정보를 추가하기
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, -median_age), y = median_age)) +
@@ -132,7 +132,7 @@ ggplot(data = com_fem,
 - geom_linerange()를 이용하여 빨간 점 위에 각 이름별로 나이의 1분위수를 최소값으로 하고 3분위수를 최대값으로 하는 막대를 추가했다.
 - 따로 그래픽 설정을 하지 않았기 때문에 기본값으로 그려졌다.
 
-##7. geom_linerange에 그래픽 요소 추가
+## 7. geom_linerange에 그래픽 요소 추가
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, -median_age), y = median_age)) +
@@ -157,7 +157,7 @@ ggplot(data = com_fem,
 - 아마 layer를 쌓는 방식으로 그래프를 그리기 때문에 이런 현상이 발생한 것 같다.
 - 코드를 작성하는 순서가 layer의 우선순위에 영향을 미칠 것 같아서 코드의 순서를 바꿔보기로 한다.
 
-##8. layer의 순서를 바꾸기
+## 8. layer의 순서를 바꾸기
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, -median_age), y = median_age)) +
@@ -179,7 +179,7 @@ ggplot(data = com_fem,
 ![graph8](https://github.com/rakkoon23/My_Dictionary_of_R/blob/master/ggplot/8.png?raw=true)
 - geom_point와 geom_linerange의 순서를 바꿨더니 이제 빨간점이 노란 막대 위에 표시된다.
 
-##9. coord_filp()으로 그래프 회전하기
+## 9. coord_filp()으로 그래프 회전하기
 ```{r}
 ggplot(data = com_fem,
        aes(x = reorder(name, -median_age), y = median_age)) +
