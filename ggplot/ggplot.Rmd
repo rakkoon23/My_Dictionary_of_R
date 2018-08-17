@@ -1,0 +1,195 @@
+---
+title: "ggplot"
+author: "Philip oh"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 이 페이지에서 배우는 함수들
+- ggplot()
+- geom_point()
+- geom_linerange()
+- coord_flip()
+
+## 필요한 라이브러리
+```{r message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(Hmisc)
+library(mdsr)
+library(babynames)
+```
+
+## 데이터 전처리
+```{r}
+BabynamesDist = make_babynames_dist()
+
+anti_names = BabynamesDist %>% 
+  filter(sex == "F") %>% 
+  group_by(name) %>%
+  summarise(est_num_alive = sum(est_alive_today)) %>% 
+  filter(est_num_alive == 0) %>% 
+  select(name)
+
+com_fem = BabynamesDist %>%
+  anti_join(anti_names, by = "name") %>% 
+  filter(sex == "F") %>%
+  group_by(name) %>%
+  summarise(
+    N = n(), 
+    est_num_alive = sum(est_alive_today),
+    q1_age = wtd.quantile(age_today, est_alive_today, probs = 0.25),
+    median_age = wtd.quantile(age_today, est_alive_today, probs = 0.5),
+    q3_age = wtd.quantile(age_today, est_alive_today, probs = 0.75)) %>%
+  arrange(desc(est_num_alive)) %>%
+  head(25)
+```
+
+- 여기서 위 내용은 아래의 그래프를 이용하기 위한 데이터 전처리이다.
+
+## 1. 그래프 기본 설정하기
+```{r}
+ggplot(data = com_fem,
+       aes(x = name, y = median_age))
+
+```
+
+- 어떤 데이터를 쓸 것인지, x축과 y축은 무엇으로 할 것인지를 지정해주었다.
+- 어떤 형태의 그래프로 그릴 것인지 지정해주지 않았기 때문에 아직 그래프가 그려지진 않았다.
+
+##2. 그래프에 데이터 표시
+```{r}
+ggplot(data = com_fem,
+       aes(x = name, y = median_age)) +
+  geom_point(fill = "black")
+```
+
+- geom_point로 데이터를 표시하고, 색을 지정해주었다.
+- 아직 데이터가 정렬되지 않았기 때문에 점이 난잡하게 찍혀 있는 것을 확인할 수 있다.
+
+##3. 데이터 정렬
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, median_age), y = median_age)) +
+  geom_point(fill = "black")
+```
+
+- reorder()를 사용하여 median_age의 값에 따라 name을 정렬했다.
+- 하지만 오름차순으로 정렬되어 아직 약간 아쉽다.
+- 내림차순으로 정렬하면 보기 더 편할 것 같다.
+
+##4. 내림차순 정렬
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, -median_age), y = median_age)) +
+  geom_point(fill = "black")
+```
+
+- reorder() 내의 median_age에 마이너스 부호를 붙여서 내림차순으로 정렬했다.
+
+##5. 주변요소 설정
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, -median_age), y = median_age)) +
+  xlab(NULL) +
+  ylab("Age (in years)") +
+  ggtitle("Median ages for females with the 25 most common names") +
+  geom_point(fill = "#ed3324",
+             colour = "white",
+             size = 4,
+             shape = 21)
+```
+
+- 제목과 ylab의 이름을 설정했다.
+- xlab은 굳이 설명하지 않아도 알 수 있어서 NULL 값을 주었다.
+- 점을 강조하기 위해 geom_point의 설정을 조금 바꾸었다.
+
+##6. 그래프에 새로운 정보를 추가하기
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, -median_age), y = median_age)) +
+  xlab(NULL) +
+  ylab("Age (in years)") +
+  ggtitle("Median ages for females with the 25 most common names") +
+  geom_point(fill = "#ed3324",
+             colour = "white",
+             size = 4,
+             shape = 21) +
+  geom_linerange(
+    aes(ymin = q1_age,
+        ymax = q3_age))
+```
+
+- geom_linerange()를 이용하여 빨간 점 위에 각 이름별로 나이의 1분위수를 최소값으로 하고 3분위수를 최대값으로 하는 막대를 추가했다.
+- 따로 그래픽 설정을 하지 않았기 때문에 기본값으로 그려졌다.
+
+##7. geom_linerange에 그래픽 요소 추가
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, -median_age), y = median_age)) +
+  xlab(NULL) +
+  ylab("Age (in years)") +
+  ggtitle("Median ages for females with the 25 most common names") +
+  geom_point(fill = "#ed3324",
+             colour = "white",
+             size = 4,
+             shape = 21) +
+  geom_linerange(
+    aes(ymin = q1_age,
+        ymax = q3_age),
+    color = "#f3d478",
+    size = 5,
+    alpha = 0.8)
+```
+
+- geom_linerange()에 그래픽 요소를 추가했다.
+- 하지만, 노란 막대가 빨간 점 위에 표시되어 뭔가 아쉽다.
+- 아마 layer를 쌓는 방식으로 그래프를 그리기 때문에 이런 현상이 발생한 것 같다.
+- 코드를 작성하는 순서가 layer의 우선순위에 영향을 미칠 것 같아서 코드의 순서를 바꿔보기로 한다.
+
+##8. layer의 순서를 바꾸기
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, -median_age), y = median_age)) +
+  xlab(NULL) +
+  ylab("Age (in years)") +
+  ggtitle("Median ages for females with the 25 most common names") +
+  geom_linerange(
+    aes(ymin = q1_age,
+        ymax = q3_age),
+    color = "#f3d478",
+    size = 5,
+    alpha = 0.8) +
+  geom_point(fill = "#ed3324",
+             colour = "white",
+             size = 4,
+             shape = 21)
+```
+
+- geom_point와 geom_linerange의 순서를 바꿨더니 이제 빨간점이 노란 막대 위에 표시된다.
+
+##9. coord_filp()으로 그래프 회전하기
+```{r}
+ggplot(data = com_fem,
+       aes(x = reorder(name, -median_age), y = median_age)) +
+  xlab(NULL) +
+  ylab("Age (in years)") +
+  ggtitle("Median ages for females with the 25 most common names") +
+  geom_linerange(
+    aes(ymin = q1_age,
+        ymax = q3_age),
+    color = "#f3d478",
+    size = 5,
+    alpha = 0.8) +
+  geom_point(fill = "#ed3324",
+             colour = "white",
+             size = 4,
+             shape = 21) +
+  coord_flip()
+```
+
+- 하지만, 이름이 긴 탓에 아직 보기에 불편하다.
+- coord_flip()을 이용하여 그래프를 회전시켰다.
